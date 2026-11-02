@@ -1,0 +1,24 @@
+# .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.binlog
+
+# Python
+__pycache__/
+*.py[cod]
+instance/
+.venv/
+venv/
+
+# Локальные базы и логи
+*.db
+*.db-journal
+*.log
+
+# Служебные папки и архивы
+_pack/
+_pa/
+*.zip

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Редактирование проекта' if project else 'Новый проект' }} — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ 'Редактирование проекта' if project else 'Новый проект' }}</h1>
+        <p class="muted">
+            <a href="{{ url_for('projects') }}">← к списку проектов</a>
+        </p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 760px;">
+    <form method="post" class="form">
+        <label>
+            <span>Название *</span>
+            <input type="text" name="title" value="{{ form.get('title', '') }}" required autofocus>
+        </label>
+
+        <label>
+            <span>Описание</span>
+            <textarea name="description">{{ form.get('description', '') }}</textarea>
+        </label>
+
+        <div class="form-row">
+            <label>
+                <span>Дата начала (дд.мм.гггг)</span>
+                <input type="text" name="start_date" value="{{ form.get('start_date', '') }}" placeholder="01.11.2026">
+            </label>
+            <label>
+                <span>Срок сдачи (дд.мм.гггг)</span>
+                <input type="text" name="deadline" value="{{ form.get('deadline', '') }}" placeholder="30.11.2026">
+            </label>
+        </div>
+
+        <div class="form-row">
+            <label>
+                <span>Статус</span>
+                <select name="status">
+                    {% for code, name in status_names.items() %}
+                        <option value="{{ code }}" {{ 'selected' if form.get('status') == code else '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                <span>Ссылка на репозиторий</span>
+                <input type="text" name="repo_url" value="{{ form.get('repo_url', '') }}"
+                       placeholder="https://github.com/...">
+            </label>
+        </div>
+
+        <label>
+            <span>Технологии (через запятую)</span>
+            <input type="text" name="technologies" value="{{ form.get('technologies', '') }}"
+                   placeholder="C#, .NET 8, WPF, Python, Flask">
+        </label>
+
+        <div class="form-actions">
+            <a class="btn btn-ghost" href="{{ url_for('projects') }}">Отмена</a>
+            <button class="btn" type="submit">Сохранить</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

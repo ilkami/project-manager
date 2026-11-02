@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Задача — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Редактирование задачи</h1>
+        <p class="muted">
+            <a href="{{ url_for('project_detail', project_id=task.project_id) }}">← к проекту «{{ task.project_title }}»</a>
+        </p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 760px;">
+    <form method="post" class="form">
+        <label>
+            <span>Название задачи *</span>
+            <input type="text" name="title" value="{{ form.get('title', task.title) }}" required autofocus>
+        </label>
+
+        <label>
+            <span>Описание</span>
+            <textarea name="description">{{ form.get('description', task.description) }}</textarea>
+        </label>
+
+        <div class="form-row">
+            <label>
+                <span>Приоритет</span>
+                <select name="priority">
+                    {% for code, name in priority_names.items() %}
+                        <option value="{{ code }}"
+                                {{ 'selected' if form.get('priority', task.priority) == code else '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                <span>Срок (дд.мм.гггг)</span>
+                <input type="text" name="due_date"
+                       value="{{ form.get('due_date', task.due_text if task.due_date else '') }}">
+            </label>
+        </div>
+
+        <label class="checkbox" style="margin: 4px 0 16px;">
+            <input type="checkbox" name="is_done" value="1"
+                   {{ 'checked' if (form.get('is_done') if request.method == 'POST' else task.is_done) else '' }}>
+            Задача выполнена
+        </label>
+
+        <div class="form-actions">
+            <a class="btn btn-ghost" href="{{ url_for('project_detail', project_id=task.project_id) }}">Отмена</a>
+            <button class="btn" type="submit">Сохранить</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

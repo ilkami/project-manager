@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <p class="muted" style="margin-bottom: 6px;">
+            <a href="{{ url_for('projects') }}">← к списку проектов</a>
+        </p>
+        <h1>{{ project.title }}</h1>
+        <p class="muted">
+            <span class="badge {{ project.status }}">{{ project.status_text }}</span>
+            &nbsp; срок: {{ project.deadline_text }} · {{ project.days_left_text }}
+            {% if project.repo_url %}
+                &nbsp; · <a href="{{ project.repo_url }}" target="_blank" rel="noopener">репозиторий</a>
+            {% endif %}
+        </p>
+    </div>
+    <div class="toolbar">
+        <a class="btn btn-ghost" href="{{ url_for('project_edit', project_id=project.id) }}">Изменить</a>
+        <form method="post" action="{{ url_for('project_delete', project_id=project.id) }}"
+              onsubmit="return confirm('Удалить проект вместе со всеми задачами?');">
+            <button class="btn btn-danger" type="submit">Удалить</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid-2" style="margin-bottom: 16px;">
+    <div class="card">
+        <h2>Описание</h2>
+        <p style="margin: 0 0 14px;">
+            {% if project.description %}{{ project.description }}{% else %}<span class="muted">Описание не заполнено.</span>{% endif %}
+        </p>
+        <p class="muted" style="margin: 0;">
+            Технологии: <b style="color: var(--text);">{{ project.technologies_text }}</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Прогресс</h2>
+        <div class="stat-value" style="margin: 0 0 8px;">{{ project.progress }}%</div>
+        <div class="progress" style="width: 100%; height: 8px;">
+            <span style="width: {{ project.progress }}%"></span>
+        </div>
+        <p class="muted" style="margin: 12px 0 0;">
+            Задачи: {{ project.tasks_done }} выполнено из {{ project.tasks_total }}<br>
+            Начало: {{ project.start_text }}
+        </p>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Задачи</h2>
+
+    {% if tasks %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Задача</th>
+                    <th>Приоритет</th>
+                    <th>Срок</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for t in tasks %}
+                    <tr>
+                        <td>
+                            <div class="cell-title" {% if t.is_done %}style="opacity: 0.55; text-decoration: line-through;"{% endif %}>
+                                {{ t.title }}
+                            </div>
+                            {% if t.description %}<div class="cell-sub">{{ t.description }}</div>{% endif %}
+                        </td>
+                        <td>{{ t.priority_text }}</td>
+                        <td>
+                            {{ t.due_text }}
+                            {% if t.overdue %}<span class="badge overdue">!</span>{% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ 'done' if t.is_done else 'open' }}">{{ t.status_text }}</span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form method="post" action="{{ url_for('task_toggle', task_id=t.id) }}">
+                                    <input type="hidden" name="back" value="{{ request.path }}">
+                                    <button class="btn btn-sm btn-ghost" type="submit">
+                                        {{ 'Вернуть' if t.is_done else 'Выполнено' }}
+                                    </button>
+                                </form>
+                                <a class="btn btn-sm btn-ghost" href="{{ url_for('task_edit', task_id=t.id) }}">Изменить</a>
+                                <form method="post" action="{{ url_for('task_delete', task_id=t.id) }}"
+                                      onsubmit="return confirm('Удалить задачу?');">
+                                    <input type="hidden" name="back" value="{{ request.path }}">
+                                    <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">Задач пока нет — добавьте первую ниже.</p>
+    {% endif %}
+
+    <details style="margin-top: 16px;">
+        <summary style="cursor: pointer; font-size: 13px; color: var(--accent);">+ Добавить задачу</summary>
+
+        <form method="post" action="{{ url_for('task_create', project_id=project.id) }}"
+              class="form" style="margin-top: 14px;">
+            <div class="inline-form">
+                <label>
+                    <span>Название задачи *</span>
+                    <input type="text" name="title" required>
+                </label>
+                <label style="max-width: 150px;">
+                    <span>Приоритет</span>
+                    <select name="priority">
+                        {% for code, name in priority_names.items() %}
+                            <option value="{{ code }}" {{ 'selected' if code == 'normal' else '' }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label style="max-width: 160px;">
+                    <span>Срок (дд.мм.гггг)</span>
+                    <input type="text" name="due_date" placeholder="30.11.2026">
+                </label>
+                <button class="btn" type="submit" style="height: 36px;">Добавить</button>
+            </div>
+        </form>
+    </details>
+</div>
+{% endblock %}

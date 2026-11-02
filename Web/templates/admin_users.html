@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Администрирование — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Администрирование</h1>
+        <p class="muted">Управление учётными записями пользователей</p>
+    </div>
+    <div class="toolbar">
+        <a class="btn" href="{{ url_for('admin_user_create') }}">Новая учётная запись</a>
+    </div>
+</div>
+
+<div class="stats">
+    <div class="card">
+        <div class="stat-label">Всего пользователей</div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Администраторов</div>
+        <div class="stat-value accent">{{ stats.admins }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Заблокировано</div>
+        <div class="stat-value danger">{{ stats.blocked }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Проектов в системе</div>
+        <div class="stat-value success">{{ stats.projects }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Логин</th>
+                <th>ФИО</th>
+                <th>Роль</th>
+                <th>Статус</th>
+                <th>Создан</th>
+                <th>Проектов</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for u in users %}
+                <tr>
+                    <td class="cell-title">{{ u.login }}</td>
+                    <td>{{ u.full_name or '—' }}</td>
+                    <td>{{ role_names[u.role] }}</td>
+                    <td>
+                        <span class="badge {{ 'done' if u.is_active else 'overdue' }}">
+                            {{ 'Активен' if u.is_active else 'Заблокирован' }}
+                        </span>
+                    </td>
+                    <td class="cell-sub">{{ u.created_at }}</td>
+                    <td>{{ u.projects_count }}</td>
+                    <td>
+                        <div class="actions">
+                            <a class="btn btn-sm btn-ghost" href="{{ url_for('admin_user_edit', user_id=u.id) }}">Изменить</a>
+
+                            <form method="post" action="{{ url_for('admin_user_toggle', user_id=u.id) }}">
+                                <button class="btn btn-sm btn-ghost" type="submit">
+                                    {{ 'Заблокировать' if u.is_active else 'Разблокировать' }}
+                                </button>
+                            </form>
+
+                            <form method="post" action="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                                  onsubmit="return confirm('Удалить учётную запись вместе с проектами и задачами?');">
+                                <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

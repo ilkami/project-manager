@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Проекты — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Проекты</h1>
+        <p class="muted">Всего: {{ projects|length }}</p>
+    </div>
+    <div class="toolbar">
+        <a class="btn" href="{{ url_for('project_create') }}">Новый проект</a>
+    </div>
+</div>
+
+<div class="card">
+    {% if projects %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Проект</th>
+                    <th>Статус</th>
+                    <th>Начало</th>
+                    <th>Срок</th>
+                    <th>Осталось</th>
+                    <th>Задачи</th>
+                    <th>Прогресс</th>
+                    <th>Технологии</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for p in projects %}
+                    <tr>
+                        <td>
+                            <a class="cell-title" href="{{ url_for('project_detail', project_id=p.id) }}">{{ p.title }}</a>
+                            {% if current_user.role == 'admin' %}
+                                <div class="cell-sub">владелец: {{ p.owner_login }}</div>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge {{ p.status }}">{{ p.status_text }}</span></td>
+                        <td>{{ p.start_text }}</td>
+                        <td>{{ p.deadline_text }}</td>
+                        <td>
+                            {{ p.days_left_text }}
+                            {% if p.overdue %}<span class="badge overdue">!</span>{% endif %}
+                        </td>
+                        <td>{{ p.tasks_done }} / {{ p.tasks_total }}</td>
+                        <td>
+                            <div class="progress-row">
+                                <div class="progress"><span style="width: {{ p.progress }}%"></span></div>
+                                <span class="value">{{ p.progress }}%</span>
+                            </div>
+                        </td>
+                        <td class="cell-sub">{{ p.technologies_text }}</td>
+                        <td>
+                            <div class="actions">
+                                <a class="btn btn-sm btn-ghost" href="{{ url_for('project_edit', project_id=p.id) }}">Изменить</a>
+                                <form method="post" action="{{ url_for('project_delete', project_id=p.id) }}"
+                                      onsubmit="return confirm('Удалить проект вместе со всеми задачами?');">
+                                    <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">Проектов пока нет. Нажмите «Новый проект», чтобы добавить первый.</p>
+    {% endif %}
+</div>
+{% endblock %}

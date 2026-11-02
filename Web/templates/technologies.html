@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Технологии — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Технологии</h1>
+        <p class="muted">Справочник технологий, которые используются в проектах</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 14px;">
+    <form method="post" action="{{ url_for('technology_create') }}" class="inline-form">
+        <label>
+            <span>Новая технология</span>
+            <input type="text" name="name" placeholder="Например, Docker" required>
+        </label>
+        <button class="btn" type="submit" style="height: 36px;">Добавить</button>
+    </form>
+</div>
+
+<div class="card">
+    {% if technologies %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Используется</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for t in technologies %}
+                    <tr>
+                        <td class="cell-title">{{ t.name }}</td>
+                        <td class="cell-sub">
+                            {% if t.projects_count %}
+                                в {{ t.projects_count }} проект(ах)
+                            {% else %}
+                                не используется
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form method="post" action="{{ url_for('technology_delete', tech_id=t.id) }}"
+                                      onsubmit="return confirm('Удалить технологию из справочника?');">
+                                    <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">Справочник пуст.</p>
+    {% endif %}
+
+    <p class="muted" style="margin-top: 14px;">
+        Технологии привязываются к проекту в карточке проекта (поле «Технологии», через запятую).
+        Новые названия добавляются в справочник автоматически.
+    </p>
+</div>
+{% endblock %}

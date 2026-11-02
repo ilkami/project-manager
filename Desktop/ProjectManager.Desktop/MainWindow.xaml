@@ -1,0 +1,310 @@
+<Window x:Class="ProjectManager.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Project Manager — управление личными проектами"
+        Height="800" Width="1280" MinHeight="640" MinWidth="1024"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="232" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============================ Боковое меню ============================ -->
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="20,22,20,14">
+                    <TextBlock Text="Project Manager" FontSize="15" FontWeight="SemiBold" />
+                    <TextBlock Text="учёт проектов программиста" Style="{StaticResource Muted}"
+                               FontSize="11" Margin="0,3,0,0" />
+                </StackPanel>
+
+                <Border Grid.Row="1" Style="{StaticResource Card}" Margin="12,0,12,14" Padding="12,10" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock x:Name="UserNameText" FontSize="13" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="UserRoleText" Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="2" Margin="12,0">
+                    <Button x:Name="NavProjects" Content="Проекты" Style="{StaticResource NavButton}"
+                            Tag="projects" Click="Nav_Click" />
+                    <Button x:Name="NavTasks" Content="Задачи" Style="{StaticResource NavButton}"
+                            Tag="tasks" Click="Nav_Click" />
+                    <Button x:Name="NavTech" Content="Технологии" Style="{StaticResource NavButton}"
+                            Tag="tech" Click="Nav_Click" />
+                    <Button x:Name="NavStats" Content="Статистика" Style="{StaticResource NavButton}"
+                            Tag="stats" Click="Nav_Click" />
+                    <Button x:Name="NavAdmin" Content="Администрирование" Style="{StaticResource NavButton}"
+                            Tag="admin" Click="OpenAdmin_Click" Visibility="Collapsed" Margin="0,14,0,2" />
+                </StackPanel>
+
+                <Button Grid.Row="3" Content="Выйти" Style="{StaticResource GhostButton}"
+                        Margin="12,0,12,16" Click="Logout_Click" />
+            </Grid>
+        </Border>
+
+        <!-- ============================ Рабочая область ============================ -->
+        <Grid Grid.Column="1" Margin="26,22,26,18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- ===== Проекты ===== -->
+            <Grid x:Name="ProjectsView">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,14">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Проекты" Style="{StaticResource H1}" />
+                        <TextBlock x:Name="ProjectsSubtitle" Style="{StaticResource Muted}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="Добавить" Style="{StaticResource PrimaryButton}" Click="AddProject_Click" Margin="0,0,8,0" />
+                        <Button Content="Изменить" Style="{StaticResource GhostButton}" Click="EditProject_Click" Margin="0,0,8,0" />
+                        <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteProject_Click" Margin="0,0,8,0" />
+                        <Button Content="Обновить" Style="{StaticResource GhostButton}" Click="Refresh_Click" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="6">
+                    <DataGrid x:Name="ProjectsGrid" Style="{StaticResource Grid}"
+                              SelectionChanged="ProjectsGrid_SelectionChanged"
+                              MouseDoubleClick="ProjectsGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ПРОЕКТ" Binding="{Binding Title}" Width="*" MinWidth="210" />
+                            <DataGridTextColumn Header="СТАТУС" Binding="{Binding StatusText}" Width="100" />
+                            <DataGridTextColumn Header="НАЧАЛО" Binding="{Binding StartDateText}" Width="85" />
+                            <DataGridTextColumn Header="СРОК" Binding="{Binding DeadlineText}" Width="85" />
+                            <DataGridTextColumn Header="ОСТАЛОСЬ" Binding="{Binding DaysLeftText}" Width="115" />
+                            <DataGridTextColumn Header="ЗАДАЧИ" Binding="{Binding TasksText}" Width="60" />
+                            <DataGridTemplateColumn Header="ПРОГРЕСС" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ProgressBar Style="{StaticResource Progress}" Value="{Binding Progress}"
+                                                         Maximum="100" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}"
+                                                       FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                       Margin="8,0,0,0" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="ТЕХНОЛОГИИ" Binding="{Binding TechnologiesText}" Width="170" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,14,0,0" Padding="16,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="270" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="DetailsTitle" Style="{StaticResource H2}" Text="Проект не выбран" />
+                            <TextBlock x:Name="DetailsDesc" Style="{StaticResource Muted}" TextWrapping="Wrap"
+                                       Margin="0,6,0,8" MaxHeight="46" TextTrimming="CharacterEllipsis" />
+                            <TextBlock x:Name="DetailsMeta" Style="{StaticResource Muted}" TextWrapping="Wrap" FontSize="11" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Name="DetailsProgressText" Text="0%" HorizontalAlignment="Right"
+                                       FontSize="18" FontWeight="SemiBold" />
+                            <ProgressBar x:Name="DetailsProgress" Style="{StaticResource Progress}"
+                                         Maximum="100" Height="8" Margin="0,6,0,0" />
+                            <TextBlock x:Name="DetailsTasks" Style="{StaticResource Muted}"
+                                       Margin="0,10,0,0" TextAlignment="Right" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ===== Задачи ===== -->
+            <Grid x:Name="TasksView" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,14">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Задачи" Style="{StaticResource H1}" />
+                        <TextBlock x:Name="TasksSubtitle" Style="{StaticResource Muted}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="Добавить" Style="{StaticResource PrimaryButton}" Click="AddTask_Click" Margin="0,0,8,0" />
+                        <Button Content="Изменить" Style="{StaticResource GhostButton}" Click="EditTask_Click" Margin="0,0,8,0" />
+                        <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteTask_Click" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock Text="Проект:" VerticalAlignment="Center" Margin="0,0,8,0"
+                               Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                    <ComboBox x:Name="ProjectFilterBox" Style="{StaticResource Combo}" Width="280"
+                              DisplayMemberPath="Title" SelectionChanged="ProjectFilterBox_SelectionChanged" />
+                    <CheckBox x:Name="OnlyOpenBox" Content="только открытые" Style="{StaticResource Check}"
+                              Margin="16,0,0,0" VerticalAlignment="Center" Click="OnlyOpen_Click" />
+                </StackPanel>
+
+                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="6">
+                    <DataGrid x:Name="TasksGrid" Style="{StaticResource Grid}"
+                              MouseDoubleClick="TasksGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="44">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource Check}" IsChecked="{Binding IsDone, Mode=OneWay}"
+                                                  Tag="{Binding}" Click="TaskDone_Click" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="ЗАДАЧА" Binding="{Binding Title}" Width="*" />
+                            <DataGridTextColumn Header="ПРОЕКТ" Binding="{Binding ProjectTitle}" Width="200" />
+                            <DataGridTextColumn Header="ПРИОРИТЕТ" Binding="{Binding PriorityText}" Width="100" />
+                            <DataGridTextColumn Header="СРОК" Binding="{Binding DueDateText}" Width="95" />
+                            <DataGridTextColumn Header="СТАТУС" Binding="{Binding StatusText}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </Grid>
+
+            <!-- ===== Технологии ===== -->
+            <Grid x:Name="TechView" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,14">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Технологии" Style="{StaticResource H1}" />
+                        <TextBlock Text="Справочник технологий, которые используются в проектах"
+                                   Style="{StaticResource Muted}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="Добавить" Style="{StaticResource PrimaryButton}" Click="AddTech_Click" Margin="0,0,8,0" />
+                        <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteTech_Click" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="6">
+                    <DataGrid x:Name="TechGrid" Style="{StaticResource Grid}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="НАЗВАНИЕ" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="ИСПОЛЬЗУЕТСЯ" Binding="{Binding ProjectsCountText}" Width="180" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <TextBlock Grid.Row="2" Style="{StaticResource Muted}" Margin="0,12,0,0" TextWrapping="Wrap"
+                           Text="Технологии привязываются к проекту в карточке проекта (поле «Технологии», через запятую). Новые названия добавляются в справочник автоматически." />
+            </Grid>
+
+            <!-- ===== Статистика ===== -->
+            <Grid x:Name="StatsView" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Text="Статистика" Style="{StaticResource H1}" />
+                    <TextBlock x:Name="StatsSubtitle" Style="{StaticResource Muted}" Margin="0,3,0,0" />
+                </StackPanel>
+
+                <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,16">
+                    <Border Style="{StaticResource Card}" Margin="0,0,10,0" Padding="16,14">
+                        <StackPanel>
+                            <TextBlock Text="Всего проектов" Style="{StaticResource Muted}" />
+                            <TextBlock x:Name="StatProjects" Text="0" FontSize="26" FontWeight="SemiBold" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Card}" Margin="0,0,10,0" Padding="16,14">
+                        <StackPanel>
+                            <TextBlock Text="В работе" Style="{StaticResource Muted}" />
+                            <TextBlock x:Name="StatWork" Text="0" FontSize="26" FontWeight="SemiBold"
+                                       Foreground="{StaticResource AccentBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Card}" Margin="0,0,10,0" Padding="16,14">
+                        <StackPanel>
+                            <TextBlock Text="Просрочено" Style="{StaticResource Muted}" />
+                            <TextBlock x:Name="StatOverdue" Text="0" FontSize="26" FontWeight="SemiBold"
+                                       Foreground="{StaticResource DangerBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Card}" Padding="16,14">
+                        <StackPanel>
+                            <TextBlock Text="Выполнено задач" Style="{StaticResource Muted}" />
+                            <TextBlock x:Name="StatTasks" Text="0" FontSize="26" FontWeight="SemiBold"
+                                       Foreground="{StaticResource SuccessBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16,10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="StatsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="50" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0">
+                                                <Run Text="{Binding StatusText, Mode=OneWay}" />
+                                                <Run Text="·" />
+                                                <Run Text="{Binding DaysLeftText, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <ProgressBar Grid.Column="1" Style="{StaticResource Progress}"
+                                                     Value="{Binding Progress}" Maximum="100" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Progress, StringFormat={}{0}%}"
+                                                   HorizontalAlignment="Right" FontSize="12"
+                                                   Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <TextBlock Grid.Row="1" x:Name="StatusBar" Style="{StaticResource Muted}" Margin="0,12,0,0" />
+        </Grid>
+    </Grid>
+</Window>
+

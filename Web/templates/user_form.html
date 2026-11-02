@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Редактирование учётной записи' if user else 'Новая учётная запись' }} — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ 'Редактирование учётной записи' if user else 'Новая учётная запись' }}</h1>
+        <p class="muted"><a href="{{ url_for('admin_users') }}">← к списку пользователей</a></p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px;">
+    <form method="post" class="form">
+        <div class="form-row">
+            <label>
+                <span>Логин *</span>
+                <input type="text" name="login" value="{{ form.get('login', user.login if user else '') }}" required autofocus>
+            </label>
+            <label>
+                <span>ФИО</span>
+                <input type="text" name="full_name" value="{{ form.get('full_name', user.full_name if user else '') }}">
+            </label>
+        </div>
+
+        <label>
+            <span>Роль</span>
+            <select name="role">
+                {% for code, name in role_names.items() %}
+                    <option value="{{ code }}"
+                            {{ 'selected' if form.get('role', user.role if user else 'user') == code else '' }}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        {% if user %}
+            <label class="checkbox" style="margin-bottom: 16px;">
+                <input type="checkbox" name="is_active" value="1"
+                       {{ 'checked' if (form.get('is_active') if request.method == 'POST' else user.is_active) else '' }}>
+                Учётная запись активна
+            </label>
+
+            <label>
+                <span>Новый пароль (оставьте пустым, чтобы не менять)</span>
+                <input type="password" name="password" autocomplete="new-password">
+            </label>
+        {% else %}
+            <label>
+                <span>Пароль * (минимум 5 символов)</span>
+                <input type="password" name="password" required autocomplete="new-password">
+            </label>
+        {% endif %}
+
+        <div class="form-actions">
+            <a class="btn btn-ghost" href="{{ url_for('admin_users') }}">Отмена</a>
+            <button class="btn" type="submit">Сохранить</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

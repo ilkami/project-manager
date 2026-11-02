@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Задачи — Project Manager{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Задачи</h1>
+        <p class="muted">Показано: {{ tasks|length }}</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 14px;">
+    <form method="get" class="inline-form">
+        <label>
+            <span>Проект</span>
+            <select name="project">
+                <option value="">Все проекты</option>
+                {% for p in projects %}
+                    <option value="{{ p.id }}" {{ 'selected' if selected_project == p.id else '' }}>{{ p.title }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label class="checkbox" style="flex: none; margin-bottom: 4px;">
+            <input type="checkbox" name="open" value="1" {{ 'checked' if only_open else '' }}>
+            только открытые
+        </label>
+
+        <button class="btn btn-ghost" type="submit" style="height: 36px;">Применить</button>
+        <a class="btn btn-ghost" href="{{ url_for('tasks') }}" style="height: 36px;">Сбросить</a>
+    </form>
+</div>
+
+<div class="card">
+    {% if tasks %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Задача</th>
+                    <th>Проект</th>
+                    <th>Приоритет</th>
+                    <th>Срок</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for t in tasks %}
+                    <tr>
+                        <td>
+                            <div class="cell-title" {% if t.is_done %}style="opacity: 0.55; text-decoration: line-through;"{% endif %}>
+                                {{ t.title }}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('project_detail', project_id=t.project_id) }}">{{ t.project_title }}</a>
+                        </td>
+                        <td>{{ t.priority_text }}</td>
+                        <td>
+                            {{ t.due_text }}
+                            {% if t.overdue %}<span class="badge overdue">!</span>{% endif %}
+                        </td>
+                        <td><span class="badge {{ 'done' if t.is_done else 'open' }}">{{ t.status_text }}</span></td>
+                        <td>
+                            <div class="actions">
+                                <form method="post" action="{{ url_for('task_toggle', task_id=t.id) }}">
+                                    <input type="hidden" name="back" value="{{ request.full_path }}">
+                                    <button class="btn btn-sm btn-ghost" type="submit">
+                                        {{ 'Вернуть' if t.is_done else 'Выполнено' }}
+                                    </button>
+                                </form>
+                                <a class="btn btn-sm btn-ghost" href="{{ url_for('task_edit', task_id=t.id) }}">Изменить</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">Задач по выбранным условиям нет.</p>
+    {% endif %}
+</div>
+{% endblock %}

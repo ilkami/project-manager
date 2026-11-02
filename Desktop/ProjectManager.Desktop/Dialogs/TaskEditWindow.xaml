@@ -1,0 +1,60 @@
+<Window x:Class="ProjectManager.Desktop.Dialogs.TaskEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Задача"
+        Width="560" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource BgBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI">
+
+    <Border Style="{StaticResource Card}" Margin="16" Padding="22,18">
+        <StackPanel>
+            <TextBlock x:Name="HeaderText" Text="Новая задача" Style="{StaticResource H1}" FontSize="18" />
+
+            <TextBlock Text="Задача *" Style="{StaticResource Caption}" Margin="0,16,0,4" />
+            <TextBox x:Name="TitleBox" Style="{StaticResource Input}" />
+
+            <TextBlock Text="Описание" Style="{StaticResource Caption}" Margin="0,12,0,4" />
+            <TextBox x:Name="DescriptionBox" Style="{StaticResource InputMultiline}" Height="66" />
+
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="150" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Проект" Style="{StaticResource Caption}" />
+                    <ComboBox x:Name="ProjectBox" Style="{StaticResource Combo}" DisplayMemberPath="Title" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Приоритет" Style="{StaticResource Caption}" />
+                    <ComboBox x:Name="PriorityBox" Style="{StaticResource Combo}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Срок (дд.мм.гггг)" Style="{StaticResource Caption}" />
+                    <TextBox x:Name="DueDateBox" Style="{StaticResource Input}" />
+                </StackPanel>
+                <CheckBox x:Name="DoneBox" Grid.Column="2" Content="Задача выполнена"
+                          Style="{StaticResource Check}" VerticalAlignment="Bottom" Margin="0,0,0,10" />
+            </Grid>
+
+            <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorText}" Margin="0,12,0,0" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
+                <Button Content="Отмена" Style="{StaticResource GhostButton}" IsCancel="True" Margin="0,0,8,0" />
+                <Button Content="Сохранить" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Save_Click" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
